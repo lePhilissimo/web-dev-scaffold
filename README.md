@@ -43,3 +43,13 @@ chmod +x web-dev-scaffold.sh
 ```
 4. Type in a name for your project
 5. The script creates a scaffold for your project, and you're ready to go!
+
+### makefile scripts
+1. Recompile Tailwind styles on file save
+```shell
+make style-watcher
+```
+2. Run a dev-server with air
+```shell
+make dev-server
+```
