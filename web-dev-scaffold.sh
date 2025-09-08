@@ -1,72 +1,81 @@
 #!/bin/bash
 
+BLUE='\033[0;34m'
+NOCOLOR='\033[0m'
+
 #-----------------------------------------
 #-----------------------------------------
 # get project name
 read -p "Enter project name: " projectName
 
-echo "Creating ${projectName}"
+echo -e "${BLUE}Creating ${projectName}${NOCOLOR}"
 
 #-----------------------------------------
 #-----------------------------------------
 # create directories
-{
-  mkdir "${projectName}"
-  cd "${projectName}/"
+echo -e "${BLUE}creating directories${NOCOLOR}"
 
-  mkdir cmd
-  mkdir cmd/api
-  mkdir cmd/api/domain
-  mkdir cmd/api/domain/data_store
-  mkdir cmd/api/domain/service
-  mkdir cmd/api/domain/repository
-  mkdir cmd/api/domain/handler
-  mkdir cmd/api/domain/entity
-  mkdir cmd/api/domain/components
-  mkdir cmd/api/domain/components/shared
+mkdir "${projectName}"
+cd "${projectName}/"
 
-  mkdir static
-  mkdir static/styles
-  mkdir static/scripts
-  mkdir db
-} &>/dev/null
-echo "directories created"
+mkdir cmd
+mkdir cmd/data_store
+mkdir cmd/service
+mkdir cmd/repository
+mkdir cmd/handler
+mkdir cmd/entity
+mkdir cmd/components
+mkdir cmd/components/shared
+
+mkdir static
+mkdir static/styles
+mkdir static/scripts
+mkdir db
+mkdir config
+
+echo -e "${BLUE}directories created!${NOCOLOR}"
 #-----------------------------------------
 #-----------------------------------------
 # install tools
-{
-  go mod init "example.com/${projectName}"
+echo -e "${BLUE}installing tools${NOCOLOR}"
 
-  # GORM
-  go get -u gorm.io/gorm
-  go get -u gorm.io/driver/sqlite
+go mod init "example.com/${projectName}"
 
-  # Echo web framework
-  go get github.com/labstack/echo/v4
+# GORM
+go get gorm.io/gorm
+go get gorm.io/driver/sqlite
 
-  # Gomponents
-  go get maragu.dev/gomponents
+# echo -e web framework
+go get github.com/labstack/echo/v4
+go get github.com/labstack/echo/v4/middleware
 
-  # Tailwind
-  curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64
-  chmod +x tailwindcss-linux-x64
-  mv tailwindcss-linux-x64 tailwindcss
+# environment variables
+go get github.com/caarlos0/env/v11
 
-  # AIR live reload
-  go install github.com/air-verse/air@latest
+# Gomponents
+go get maragu.dev/gomponents
 
-  # Flowbite UI
-  wget https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css -P ./static/styles
-  wget https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js -P ./static/scripts
+# Tailwind
+curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64
+chmod +x tailwindcss-linux-x64
+mv tailwindcss-linux-x64 tailwindcss
 
-  # HTMX
-  wget https://unpkg.com/htmx.org@2.0.2/dist/htmx.min.js -P ./static/scripts
+# AIR live reload
+go install github.com/air-verse/air@latest
 
-} &>/dev/null
-echo "tools installed"
+# Flowbite UI
+wget https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css -P ./static/styles
+wget https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js -P ./static/scripts
+
+# HTMX
+wget https://unpkg.com/htmx.org@2.0.6/dist/htmx.min.js -P ./static/scripts
+
+echo -e "${BLUE}tools installed!"
 #-----------------------------------------
 #-----------------------------------------
 # create files
+echo -e "${BLUE}creating files${NOCOLOR}"
+
 {
   # environment variables
   cat >.env <<EOF
@@ -95,7 +104,7 @@ END
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./cmd/api/domain/components/**/*.go",
+    "./cmd/components/**/*.go",
   ],
   theme: {
     extend: {},
@@ -109,21 +118,29 @@ END
 package main
 
 import (
-	"example.com/${projectName}/cmd/api/domain/components/shared"
+	"example.com/${projectName}/cmd/components/shared"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"example.com/${projectName}/config"
 )
 
 func main() {
 	// initialize config
+	cfg, err := config.Get()
+	if err != nil {
+	  panic(err.Error())
+	}
 
 	// initialize database
-	_, err := InitializeDatabase("")
+	_, err = InitializeDatabase(cfg.DatabaseUrl)
 	if err != nil {
 		panic(err.Error())
 	}
 
 	// initalize router
 	e := echo.New()
+	e.Use(middleware.RequestID())
+	e.Use(middleware.Logger())
 	e.GET("/", func(c echo.Context) error {
 		return shared.Page("Welcome!", shared.SampleBody()).Render(c.Response())
 	})
@@ -147,7 +164,7 @@ func InitializeDatabase(dsn string) (*gorm.DB, error) {
 END
 
   # shared page component
-  cat >cmd/api/domain/components/shared/shared.go <<END
+  cat >cmd/components/shared/page.go <<END
 package shared
 
 import (
@@ -183,14 +200,36 @@ func SampleBody() g.Node {
 }
 END
 
+cat >config/config.go << END
+package config
+
+import (
+	"github.com/caarlos0/env/v11"
+)
+
+type Config struct {
+  DatabaseUrl string `env:"DATABASE_URL"`
+}
+
+func Get() (*Config, error) {
+  var cfg Config
+  err := env.Parse(&cfg)
+  if err != nil {
+    return nil, err
+  }
+  return &cfg, nil
+}
+END
+
   # sync go modules
   go mod vendor
 
 } &>/dev/null
 
-echo "files created"
+echo -e "${BLUE}files created!"
 #-----------------------------------------
 #-----------------------------------------
+echo -e "${BLUE}initializing git${NOCOLOR}"
 {
   # initialize git
   git init
@@ -199,6 +238,6 @@ echo "files created"
 tailwindcss
 EOF
 } &>/dev/null
-echo "git initialized"
+echo -e "${BLUE}git initialized!"
 
-echo "Project is ready at ${projectName}/"
+echo -e "${BLUE}Project is ready at ${projectName}/ !"
