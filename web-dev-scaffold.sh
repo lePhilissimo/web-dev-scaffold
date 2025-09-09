@@ -91,12 +91,15 @@ END
 
   # dev-server
   cat >makefile <<END
-style-watcher:
+tailwind:
 	./tailwindcss -i ./input.css -o ./static/styles/output.css --watch
 
-dev-server:
+air:
 	cd cmd/; \
 	air
+
+dev:
+	make -j2 tailwind air
 END
 
   # tailwind config

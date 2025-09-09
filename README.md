@@ -14,8 +14,10 @@ You don't have to use this script. You may disagree with one, many, or all of my
   - bring your own database
 - [Echo Framework](https://github.com/labstack/echo)
   - handy Go web framework
+- [$Env](https://github.com/caarlos0/env/v11)
+  - parses environment variables into structs.
 - [Gomponents](https://www.gomponents.com/)
-  - I prefer this over TEMPL currently, as it doesn't need a separate compiler, and the Go LSP in IntelliJ treats it like any other Go code.
+  - TEMPL could also work, but this option doesn't need a separate compiler, and the Go LSP in IntelliJ treats it like any other Go code.
 - [TailwindCSS](https://tailwindcss.com/blog/standalone-cli)
   - I want to limit my Javascript exposure; the Standalone CLI lets me avoid a package.json and other node artifacts in my project
 - [FlowbiteUI](https://flowbite.com/docs/getting-started/quickstart/)
@@ -25,31 +27,16 @@ You don't have to use this script. You may disagree with one, many, or all of my
 - [Air](https://github.com/air-verse/air)
   - makes it faster to rebuild app on changes and view them quickly in the browser
 
-## Methodologies
-- Domain Driven Design
-  - I am still a noob in this area, but I've found some of the concepts helpful to keep in mind as I approach my projects' architecture.
-- Test Driven Development
-  - I'm still working the hate out of my love / hate relationship with TDD, but it just keeps helping me more and more over time, and I want to stick with it.
-
 ## How to use
-1. Clone the repo
-2. make the script executable
+1. Download the ```web-dev-scaffold.sh``` file.
+2. make the script executable.
 ```shell
 chmod +x web-dev-scaffold.sh
 ```
-3. Execute the script
+3. Execute the script.
 ```shell
 ./web-dev-scaffold.sh
 ```
-4. Type in a name for your project
+4. Type in a name for your project, then press ```enter```.
 5. The script creates a scaffold for your project, and you're ready to go!
-
-### makefile scripts
-1. Recompile Tailwind styles on file save
-```shell
-make style-watcher
-```
-2. Run a dev-server with air
-```shell
-make dev-server
-```
+6. ```cd``` into your new project, and run ```make dev``` to start the dev server.
